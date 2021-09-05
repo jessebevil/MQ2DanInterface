@@ -1,5 +1,5 @@
 #pragma once
-#include "..\MQ2Plugin.h"
+#include <mq/Plugin.h>
 
 void AddObservation(const char* szName, const char* szQuery, bool bSilent = 0);
 void RemoveObservation(const char* szName, const char* szQuery);

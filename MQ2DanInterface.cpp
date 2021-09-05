@@ -22,7 +22,7 @@ Dannet Webpage: https://www.redguides.com/community/resources/mq2dannet.322/
 */
 
 
-#include "../MQ2Plugin.h"
+#include <mq/Plugin.h>
 #include "DanInterfaceWnd.h"
 #include <functional>
 
@@ -30,9 +30,9 @@ PreSetup("MQ2DanInterface");
 typedef void(*fFunction)();
 std::map<std::string, fFunction> options;
 
-PMQPLUGIN FindMQ2DanNetPlugin()
+MQPlugin* FindMQ2DanNetPlugin()
 {
-	PMQPLUGIN pPlugin = pPlugins;
+	MQPlugin* pPlugin = pPlugins;
 	while (pPlugin)
 	{
 		if (!_stricmp("MQ2Dannet", pPlugin->szFilename))
@@ -48,7 +48,7 @@ PMQPLUGIN FindMQ2DanNetPlugin()
 
 using fPeer_Connected = bool(*)(const std::string& name);//
 bool IsPeerConnected(const std::string& szName) {
-    PMQPLUGIN pDannet = FindMQ2DanNetPlugin();
+    MQPlugin* pDannet = FindMQ2DanNetPlugin();
     if (!pDannet)
         return false;
 
@@ -63,7 +63,7 @@ bool IsPeerConnected(const std::string& szName) {
 }
 inline bool InGame()
 {
-    return(GetGameState() == GAMESTATE_INGAME && GetCharInfo() && GetCharInfo()->pSpawn && GetCharInfo2());
+    return(GetGameState() == GAMESTATE_INGAME && GetCharInfo() && GetCharInfo()->pSpawn && GetPcProfile());
 }
 
 void SeeDanShow() {
@@ -199,7 +199,7 @@ PLUGIN_API VOID SetGameState(DWORD GameState)
 {
     DebugSpewAlways("MQ2DanInterface::SetGameState()");
     if (InGame()) {
-        sprintf_s(ThisINIFileName, MAX_STRING, "%s\\MQ2DanInterface_%s.ini", gszINIPath, GetCharInfo()->Name);
+        sprintf_s(ThisINIFileName, MAX_STRING, "%s\\MQ2DanInterface_%s.ini", gPathConfig, GetCharInfo()->Name);
 
         if (!InterfaceWnd)
             CreateInterfaceWindow();

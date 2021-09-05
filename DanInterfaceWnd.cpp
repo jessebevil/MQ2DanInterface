@@ -66,13 +66,12 @@ CInterfaceWnd::CInterfaceWnd() : CCustomWnd("InterfaceWnd") {
 		WrongUI = true;
 		return;
 	}
-	else WrongUI = false;//Would only happen if they /loadskin after creating the window and there was a change to this window.
+	else {
+		WrongUI = false;//Would only happen if they /loadskin after creating the window and there was a change to this window.
+	}
+
 	LoadLoc();
 	LoadSettings();
-	//Add my window to the list of notifiable windows set that we can do stuff with it.
-	SetWndNotification(CInterfaceWnd);
-
-	//Tabs->UpdatePage();//doesn't appear to do anything at this point in time.
 }
 
 CInterfaceWnd::~CInterfaceWnd() {}//Decontructor is empty, just destroy that shit.
@@ -147,11 +146,11 @@ void CInterfaceWnd::UpdateListBox()
 			int LineNum = CQueryList->AddString(CXStr(""), 0, 0, 0);
 
 
-			CQueryList->SetItemText(LineNum, Column::Number, &CXStr(temp));
+			CQueryList->SetItemText(LineNum, Column::Number, CXStr(temp));
 			CQueryList->SetItemColor(LineNum, Column::Number, 0xFF00CC00);
-			CQueryList->SetItemText(LineNum, Column::Query, &CXStr(vObservations.at(i).c_str()));
+			CQueryList->SetItemText(LineNum, Column::Query, CXStr(vObservations.at(i).c_str()));
 			CQueryList->SetItemColor(LineNum, Column::Query, 0xFF00CC00);
-			CQueryList->SetItemText(LineNum, Column::Value, &CXStr(GetObserveValue(szName, vObservations.at(i).c_str())));
+			CQueryList->SetItemText(LineNum, Column::Value, CXStr(GetObserveValue(szName, vObservations.at(i).c_str())));
 			CQueryList->SetItemColor(LineNum, Column::Value, 0xFF00CC00);
 		}
 
@@ -285,7 +284,7 @@ int CInterfaceWnd::WndNotification(CXWnd* pWnd, unsigned int Message, void* unkn
 		break;
 	case XWM_CLOSE:
 		break;
-	case XWN_TOOLTIP:
+	case XWM_TOOLTIP:
 		break;
 	case XWM_NEWVALUE://One of the Inputboxes has a new value. This Happens on resize atm.
 		break;
@@ -309,7 +308,7 @@ int CInterfaceWnd::WndNotification(CXWnd* pWnd, unsigned int Message, void* unkn
 		break;
 	case XWM_ACHIEVEMENTLINK:
 		break;
-	case XWN_DIALOGRESPONSELINK:
+	case XWM_DIALOGRESPONSELINK:
 		break;
 	case XWM_FOCUS://This seems more like LeftMouseDown
 		break;
@@ -317,32 +316,31 @@ int CInterfaceWnd::WndNotification(CXWnd* pWnd, unsigned int Message, void* unkn
 		break;
 	case XWM_TEXTENTRY_COMPLETE:
 		break;
-	case XWN_THUMBTRACK://Slider moved - 46
+	case XWM_THUMBTRACK://Slider moved - 46
 		break;
-	case 47://Happens when I press a button? Doesn't apply to CheckBoxButtons.
+	case XWM_SELITEM_DOWN://Happens when I press a button? Doesn't apply to CheckBoxButtons.
 		{
 			if (pWnd == GetChildItem("Interface_AddQuery_Button")) {
-				//CQueryList->ClearAllSel();
-				char szQuery[MAX_STRING] = { 0 };
-				char szName[128] = { 0 };
+				std::string szQuery;
+				std::string szName;
 				if (CQueryInputBox) {
-					GetCXStr(CQueryInputBox->InputText, szQuery, MAX_STRING);
+					szQuery = CQueryInputBox->InputText.c_str();
 				}
 
 				{//Scope peers vector.
 					std::vector<std::string> peers = GetPeersList();
 					if (iPeersSelection < peers.size()) {
-						strcpy_s(szName, peers.at(iPeersSelection).c_str());
+						szName = peers.at(iPeersSelection).c_str();
 					}
 				}
 
 				bool bValid = true;
-				if (!strlen(szQuery)) {
+				if (!szQuery.length()) {
 					WriteOut("\apQuery \aris empty");
 					bValid = false;
 				}
 
-				if (!strlen(szName)) {
+				if (!szName.length()) {
 					WriteOut("\apName \aris empty");
 					bValid = false;
 				}
@@ -350,7 +348,7 @@ int CInterfaceWnd::WndNotification(CXWnd* pWnd, unsigned int Message, void* unkn
 				if (!bValid)//If either the query or the name was empty, let's not do anything else.
 					break;
 
-				AddObservation(szName, szQuery);
+				AddObservation(szName.c_str(), szQuery.c_str());
 			}
 
 			if (pWnd == GetChildItem("Interface_RemoveSelectedQuery_Button")) {
@@ -374,9 +372,9 @@ int CInterfaceWnd::WndNotification(CXWnd* pWnd, unsigned int Message, void* unkn
 			}
 		}
 		break;
-	case XWN_OUTPUT_TEXT:
+	case XWM_OUTPUT_TEXT:
 		break;
-	case XWN_COMMANDLINK:
+	case XWM_COMMANDLINK:
 		break;
 	default:
 		if (InterfaceWnd)
@@ -413,7 +411,7 @@ void CreateInterfaceWindow() {
 
 		char szTitle[MAX_STRING];
 		sprintf_s(szTitle, "%s %s", pluginname.c_str(), COMPILED);
-		InterfaceWnd->CSetWindowText(szTitle);
+		InterfaceWnd->SetWindowText(szTitle);
 	}
 }
 
@@ -488,49 +486,38 @@ void FontChange(const char* szLine) {
 
 	if (InterfaceWnd)
 	{
-		struct FONTDATA
-		{
-			unsigned long NumFonts;
-			char** Fonts;
-		};
-
-		FONTDATA* Fonts;            // font array structure
-		unsigned long* SelFont;             // selected font
-		Fonts = (FONTDATA*)&(((char*)pWndMgr)[EQ_CHAT_FONT_OFFSET]);
-
 		if (Arg[0])
 		{
 			int size = atoi(Arg);
 
-			if (size < 0 || size>10)
+			if (size < 0 || size > 10)
 			{
-				WriteOut("%sUsage: /%s font 0-10", pluginmsg.c_str(), plugincmd.c_str());
+				WriteOut("Usage: /%s font 0-10", plugincmd.c_str());
 				return;
 			}
 
 			// check font array bounds and pointers
-			if (size < 0 || size >= (int)Fonts->NumFonts)
+			if (size < 0 || size >= pWndMgr->FontsArray.GetCount()) {
+				return;
+			}
+
+			CTextureFont* font = pWndMgr->FontsArray[size];
+			if (!font)
 			{
 				return;
 			}
 
-			if (!Fonts->Fonts)
-			{
-				return;
-			}
-
-			SelFont = (unsigned long*)Fonts->Fonts[size];
 			// Save the text, change the font, then restore the text
-			CXStr str(((CStmlWnd*)InterfaceWnd->InterfaceOutput)->GetSTMLText());
-			((CXWnd*)InterfaceWnd->InterfaceOutput)->SetFont(SelFont);
-			((CStmlWnd*)InterfaceWnd->InterfaceOutput)->SetSTMLText(str, 1, 0);
-			((CStmlWnd*)InterfaceWnd->InterfaceOutput)->ForceParseNow();
+			CXStr str = InterfaceWnd->InterfaceOutput->GetSTMLText();
+			((CXWnd*)InterfaceWnd->InterfaceOutput)->SetFont(font);
+			InterfaceWnd->InterfaceOutput->SetSTMLText(str);
+			InterfaceWnd->InterfaceOutput->ForceParseNow();
 			// scroll to bottom of chat window
 			InterfaceWnd->FontSize = size;
 			WritePrivateProfileString("General", "FontSize", szLine, INIFileName);//Save the font size.
 		}
 		else {
-			WriteOut("%s to set the font, please use /%s font #\n# must be between 0 and 10:", pluginmsg.c_str(), plugincmd.c_str());
+			WriteOut("To set the font, please use /%s font #\n# must be between 0 and 10:", plugincmd.c_str());
 		}
 	}
 }
