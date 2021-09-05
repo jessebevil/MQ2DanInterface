@@ -78,7 +78,7 @@ void SeeDanToggle() {
     MakeWindowToggle();
 };
 
-void FuckingAroundAgain(char* szQuery) {
+void FuckingAroundAgain(char* szQuery = "") {
     //static bool firstuse = true;
     //std::vector<std::string> peers = GetPeersList();
     //unsigned int count = GetPeersCount();
@@ -111,16 +111,26 @@ char* GetServer() {
 }
 
 void TestCommand() {
-    FuckingAroundAgain("Me.PctHPs");
+    FuckingAroundAgain();
 }
 
 void SetupOptions() {//input all of these in lowercase.
+	//Both of these show the window.
     options.insert(std::make_pair("on", SeeDanShow));
+	options.insert(std::make_pair("show", SeeDanShow));
+
+	//Both of these hide the window.
     options.insert(std::make_pair("off", SeeDanHide));
+	options.insert(std::make_pair("hide", SeeDanHide));
+
+	//Toggle the window's visibility.
     options.insert(std::make_pair("toggle", SeeDanToggle));
+
+	//Run whatever crap I've smashed into the test command.
     options.insert(std::make_pair("test", TestCommand));
 }
 
+//prints all commands from the available options map. TODO: consider using a struct to create the command, the function it should fire, and the help to explain it's use.
 void print_options()
 {
     std::map<std::string, fFunction>::iterator it;
@@ -131,7 +141,7 @@ void print_options()
 }
 
 void SeeDannet(PSPAWNINFO pSpawn, char* szLine) {
-    if (!strlen(szLine)) {
+    if (!strlen(szLine)) {//if the command `/seedan` was used without a parameter at the end, spit out available options.
         WriteOut("Invalid option");
         print_options();
         return;
@@ -141,11 +151,11 @@ void SeeDannet(PSPAWNINFO pSpawn, char* szLine) {
     strcpy_s(temp, szLine);
     _strlwr_s(temp, 64);
     auto result = options.find(temp);
-    if (result != options.end()) {
+    if (result != options.end()) {//if we found the parameter the user passed in the options, then run the function for that option.
         if (result->second) {
             result->second();
         }
-    } else {
+    } else {//otherwise, tell the user it wasn't valid, and output the available options.
         WriteOut("Invalid option - %s", szLine);
         print_options();
     }
@@ -155,27 +165,15 @@ PLUGIN_API VOID InitializePlugin(VOID)
 {
     SetupOptions();
     AddXMLFile("MQUI_DanNet.xml");
-    //Add commands, MQ2Data items, hooks, etc.
     AddCommand("/seedannet",SeeDannet);
     if (InGame())
         CreateInterfaceWindow();
-    //bmMyBenchmark=AddMQ2Benchmark("My Benchmark Name");
 }
 
 // Called once, when the plugin is to shutdown
 PLUGIN_API VOID ShutdownPlugin(VOID)
 {
     RemoveCommand("/seedannet");
-    //Remove commands, MQ2Data items, hooks, etc.
-    //RemoveMQ2Benchmark(bmMyBenchmark);
-    //RemoveCommand("/mycommand");
-    //RemoveXMLFile("MQUI_MyXMLFile.xml");
-}
-
-// Called after entering a new zone
-PLUGIN_API VOID OnZoned(VOID)
-{
-    DebugSpewAlways("MQ2DanInterface::OnZoned()");
 }
 
 // Called once directly before shutdown of the new ui system, and also
@@ -183,7 +181,6 @@ PLUGIN_API VOID OnZoned(VOID)
 PLUGIN_API VOID OnCleanUI(VOID)
 {
     DestroyInterfaceWindow();
-    // destroy custom windows, etc
 }
 
 // Called once directly after the game ui is reloaded, after issuing /loadskin
@@ -208,7 +205,7 @@ PLUGIN_API VOID SetGameState(DWORD GameState)
 
 
 // This is called every time MQ pulses
-PLUGIN_API VOID OnPulse(VOID)
+PLUGIN_API VOID OnPulse()
 {
     if (InGame() && !WrongUI) {
         if (InterfaceWnd) {
@@ -217,39 +214,16 @@ PLUGIN_API VOID OnPulse(VOID)
     }
 }
 
-// This is called every time WriteChatColor is called by MQ2Main or any plugin,
-// IGNORING FILTERS, IF YOU NEED THEM MAKE SURE TO IMPLEMENT THEM. IF YOU DONT
-// CALL CEverQuest::dsp_chat MAKE SURE TO IMPLEMENT EVENTS HERE (for chat plugins)
-PLUGIN_API DWORD OnWriteChatColor(PCHAR Line, DWORD Color, DWORD Filter)
-{
-    DebugSpewAlways("MQ2DanInterface::OnWriteChatColor(%s)",Line);
-    return 0;
-}
-
-// This is called every time EQ shows a line of chat with CEverQuest::dsp_chat,
-// but after MQ filters and chat events are taken care of.
-PLUGIN_API DWORD OnIncomingChat(PCHAR Line, DWORD Color)
-{
-    DebugSpewAlways("MQ2DanInterface::OnIncomingChat(%s)",Line);
-    return 0;
-}
-
-// This is called when we receive the EQ_BEGIN_ZONE packet is received
-PLUGIN_API VOID OnBeginZone(VOID)
-{
-    DebugSpewAlways("MQ2DanInterface::OnBeginZone");
-}
-
 // This is called when we receive the EQ_END_ZONE packet is received
 PLUGIN_API VOID OnEndZone(VOID)
 {
-    WriteChatf("OnEndZone %llu", GetTickCount64());
-    DebugSpewAlways("MQ2DanInterface::OnEndZone");
+//    WriteChatf("OnEndZone %llu", GetTickCount64());
+//    DebugSpewAlways("MQ2DanInterface::OnEndZone");
 }
 // This is called when pChar!=pCharOld && We are NOT zoning
 // honestly I have no idea if its better to use this one or EndZone (above)
-PLUGIN_API VOID Zoned(VOID)
+PLUGIN_API VOID Zoned(VOID)//this never outputs anything that I've seen. Not sure "Zoned" is the same as OnEndZone anymore, or it's not being called?
 {
-    WriteChatf("OnZoned %llu", GetTickCount64());
-    DebugSpewAlways("MQ2DanInterface::Zoned");
+//    WriteChatf("OnZoned %llu", GetTickCount64());
+//    DebugSpewAlways("MQ2DanInterface::Zoned");
 }
