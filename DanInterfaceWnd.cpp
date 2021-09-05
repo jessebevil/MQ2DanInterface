@@ -10,8 +10,6 @@ std::string plugincmd = "/seedannet";
 char ThisINIFileName[MAX_STRING] = "";
 unsigned int iPeersSelection = 0;
 
-bool CheckBox[NumCheckBoxes] = { 0 };
-
 CInterfaceWnd* InterfaceWnd = 0;
 
 CInterfaceWnd::CInterfaceWnd() : CCustomWnd("InterfaceWnd") {
@@ -66,13 +64,14 @@ CInterfaceWnd::CInterfaceWnd() : CCustomWnd("InterfaceWnd") {
 		WrongUI = true;
 		return;
 	}
-	else WrongUI = false;//Would only happen if they /loadskin after creating the window and there was a change to this window.
+	else {
+		WrongUI = false;//Would only happen if they /loadskin after creating the window and there was a change to this window.
+	}
+
 	LoadLoc();
 	LoadSettings();
 	//Add my window to the list of notifiable windows set that we can do stuff with it.
 	SetWndNotification(CInterfaceWnd);
-
-	//Tabs->UpdatePage();//doesn't appear to do anything at this point in time.
 }
 
 CInterfaceWnd::~CInterfaceWnd() {}//Decontructor is empty, just destroy that shit.
@@ -148,7 +147,7 @@ void CInterfaceWnd::UpdateListBox()
 
 
 			CQueryList->SetItemText(LineNum, Column::Number, &CXStr(temp));
-			CQueryList->SetItemColor(LineNum, Column::Number, 0xFF00CC00);
+			CQueryList->SetItemColor(LineNum, Column::Number, 0xFF00CC00);//makes it green. Could be any color honestly.
 			CQueryList->SetItemText(LineNum, Column::Query, &CXStr(vObservations.at(i).c_str()));
 			CQueryList->SetItemColor(LineNum, Column::Query, 0xFF00CC00);
 			CQueryList->SetItemText(LineNum, Column::Value, &CXStr(GetObserveValue(szName, vObservations.at(i).c_str())));
@@ -163,20 +162,22 @@ void CInterfaceWnd::UpdateListBox()
 }
 
 //Should add all buffs to all peers for monitoring.
+//Seems that it might go too fast, and ends up missing some. So multiple iterations are needed to correctly add them all.
 void CInterfaceWnd::AddAllBuffs()
 {
 	std::vector<std::string> peers = GetPeersList();
 	char szName[MAX_STRING] = { 0 };
 	for (unsigned int i = 0; i < peers.size(); i++) {//For each Peer connected.
 		strcpy_s(szName, peers.at(i).c_str());
-		for (int i = 0; i < NUM_LONG_BUFFS; i++) {
+
+		for (int i = 1; i < NUM_LONG_BUFFS; i++) {
 			char szBuffNum[MAX_STRING] = { 0 };
 			sprintf_s(szBuffNum, "Me.Buff[%i].Name", i);
 			AddObservation(szName, szBuffNum, true);
 
 		}
 
-		for (int i = 0; i < NUM_SHORT_BUFFS; i++) {
+		for (int i = 1; i < NUM_SHORT_BUFFS; i++) {
 			char szBuffNum[MAX_STRING] = { 0 };
 			sprintf_s(szBuffNum, "Me.Song[%i].Name", i);
 			AddObservation(szName, szBuffNum, true);
@@ -229,16 +230,14 @@ bool CInterfaceWnd::LoadSettings() {
 	std::vector<std::string> peers = GetPeersList();
 
 	CPeersCombo->DeleteAll();//Clear the list
-	//CPeersCombo->ListHeight = 120;
 	CPeersCombo->SetTooltip("List of peers connected to Dannet.");
-	//CPeersCombo->ListHeightMax = 120;//If you don't make this bigger, then it creates VScroll, if you adjust VScroll it adjust "GetCurChoice()" index;
-	//add all the options to the Mode ComboBox
 
+	//add all the options to the Mode ComboBox
 	for (unsigned int i = 0; i < peers.size(); i++) {//For each Peer connected.
 		CPeersCombo->InsertChoice((char*)peers.at(i).c_str());
 	}
 
-	CPeersCombo->InsertChoice("");
+	CPeersCombo->InsertChoice("");//Blank choice at the end. Without it, sometimes the last entry isn't shown.
 	CPeersCombo->SetChoice(iPeersSelection);//Let's set it to whatever the mode currently is.
 
 	return true;
@@ -387,7 +386,7 @@ int CInterfaceWnd::WndNotification(CXWnd* pWnd, unsigned int Message, void* unkn
 }
 
 void CInterfaceWnd::SaveSetting(char* Key, char* Value, ...) {
-
+	//Nothing to save atm lol.
 }
 
 void DestroyInterfaceWindow() {
@@ -445,7 +444,7 @@ void WriteOut(char* szText, ...)
 	if (char* szOutput = (char*)LocalAlloc(LPTR, len + 32)) {
 		vsprintf_s(szOutput, len, szText, vaList);
 		char szTemp[MAX_STRING] = { 0 };
-		sprintf_s(szTemp, "%s %s", pluginmsg.c_str(), szOutput);
+		sprintf_s(szTemp, "%s %s", pluginmsg.c_str(), szOutput);//Add the pluginmsg to the beginning of every output.
 		if (InterfaceWnd && !WrongUI && InterfaceWnd->IsVisible())
 		{
 			Output(szTemp);
@@ -462,7 +461,7 @@ void MakeWindowVisible() {
 			InterfaceWnd->SetVisible(1);
 	}
 	else {
-		WriteOut("The Price is WRONG BITCH!");
+		WriteOut("InterfaceWnd doesn't exist, sounds like your UI file isn't loaded. Try reloading your UI.");
 	}
 }
 
@@ -482,7 +481,7 @@ void MakeWindowToggle() {
 	}
 }
 
-void FontChange(const char* szLine) {
+void FontChange(const char* szLine) {//Not currently used. But hey, the code is already here!
 	char Arg[MAX_STRING] = { 0 };
 	GetArg(Arg, szLine, 2);
 

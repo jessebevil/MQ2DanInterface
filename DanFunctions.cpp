@@ -11,7 +11,8 @@ void AddObservation(const char* szName, const char* szQuery, bool bSilent) {
         EzCommand(dobservecmd);
     }
     else {
-        if (!bSilent) WriteOut("%s is already observing %s", szName, szQuery);
+        if (!bSilent)
+            WriteOut("%s is already observing %s", szName, szQuery);
     }
 }
 
