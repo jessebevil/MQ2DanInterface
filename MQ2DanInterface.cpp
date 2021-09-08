@@ -5,7 +5,6 @@
 Still needed.
 a Listbox to show channels
 a Listbox to show currently connected peers. (handled in the peers combo box?)
-Make the peers combo box repopulate when the number of peers changes. Right now it's only populated when the plugin loads the window I believe.
 
 Reading Material:
 Dannet Resource Page: https://www.redguides.com/community/resources/mq2dannet.322/
@@ -185,9 +184,25 @@ PLUGIN_API VOID SetGameState(DWORD GameState)
 
 PLUGIN_API VOID OnPulse(VOID)
 {
+    //create a timer to prevent us from pulsing too fast.
+    static uint64_t refreshTimer = 0;
+
+    if (refreshTimer + 500 > GetTickCount64())
+        return;
+
+    refreshTimer = GetTickCount64();
+
+    static int peers = GetPeersCount();
+
     if (InGame() && !WrongUI) {
         if (InterfaceWnd) {
             InterfaceWnd->UpdateListBox();
+            {
+                if (peers != GetPeersCount()) {//if the peers count has changed, update the peers combo box.
+                    InterfaceWnd->LoadSettings();
+                    peers = GetPeersCount();
+                }
+            }
         }
     }
 }
