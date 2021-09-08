@@ -119,12 +119,6 @@ enum Column : int {
 
 void CInterfaceWnd::UpdateListBox()
 {
-	static uint64_t refreshTimer = 0;
-
-	if (refreshTimer + 500 > GetTickCount64())
-		return;
-
-	refreshTimer = GetTickCount64();
 	if (CQueryList) {
 		int ScrollPos = CQueryList->GetVScrollPos();//Saving this so we can put it back where we found it.
 		int Selection = CQueryList->GetCurSel();//Should save this before we delete all the entries.
