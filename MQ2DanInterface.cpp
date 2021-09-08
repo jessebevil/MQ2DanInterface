@@ -68,7 +68,7 @@ void SeeDanToggle() {
 };
 
 //szQuery used for the commented out code block, if you /seedan test, and the function call includes a query, it will add it for all connected peers.
-void FuckingAroundAgain(char* szQuery = "") {
+void TestQuery(char* szQuery = "") {
     //Commented out code work to dump out all known information to the MQ2Window.
     //std::vector<std::string> peers = GetPeersList();
     //unsigned int count = GetPeersCount();
@@ -103,7 +103,7 @@ char* GetServer() {
 }
 
 void TestCommand() {
-    FuckingAroundAgain();
+    TestQuery();
 }
 
 void SetupOptions() {//input all of these in lowercase.

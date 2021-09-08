@@ -186,17 +186,14 @@ void CInterfaceWnd::AddAllBuffs()
 }
 
 //If the window was saved, we can load it back where it was.
-void CInterfaceWnd::LoadLoc(char szChar[64]) {
+void CInterfaceWnd::LoadLoc() {
 	if (!GetCharInfo())
 		return;
 
 	bool Saved;
 	char szName[256] = { 0 };
 
-	if (!szChar)
-		strcpy_s(szName, GetCharInfo()->Name);
-	else
-		strcpy_s(szName, szChar);
+	strcpy_s(szName, GetCharInfo()->Name);
 
 	Saved = (GetPrivateProfileInt(szName, "Saved", 0, INIFileName) > 0 ? true : false);
 	if (Saved) {//Setting the window location is causing fuckery. Let's stop setting the location and just let EQ handle it since it's being a pain in my ass.
@@ -219,7 +216,6 @@ void CInterfaceWnd::LoadLoc(char szChar[64]) {
 	char savedFont[MAX_STRING] = { 0 };
 	GetPrivateProfileString("General", "FontSize", "font 4", savedFont, MAX_STRING, INIFileName);
 	FontChange(savedFont);
-
 }
 
 //Fill in those checkboxes!

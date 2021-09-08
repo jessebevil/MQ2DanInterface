@@ -33,7 +33,7 @@ public:
 	CInterfaceWnd();
 	~CInterfaceWnd();
 
-	void LoadLoc(char szChar[64] = 0);
+	void LoadLoc();
 	bool LoadSettings();
 	void SaveLoc();
 	void UpdateListBox();
