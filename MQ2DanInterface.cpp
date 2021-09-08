@@ -145,7 +145,7 @@ void SeeDannet(PSPAWNINFO pSpawn, char* szLine) {
     }
 }
 // Called once, when the plugin is to initialize
-PLUGIN_API VOID InitializePlugin(VOID)
+PLUGIN_API VOID InitializePlugin()
 {
     SetupOptions();
     AddXMLFile("MQUI_DanNet.xml");
@@ -155,17 +155,17 @@ PLUGIN_API VOID InitializePlugin(VOID)
 }
 
 // Called once, when the plugin is to shutdown
-PLUGIN_API VOID ShutdownPlugin(VOID)
+PLUGIN_API VOID ShutdownPlugin()
 {
     RemoveCommand("/seedannet");
 }
 
-PLUGIN_API VOID OnCleanUI(VOID)
+PLUGIN_API VOID OnCleanUI()
 {
     DestroyInterfaceWindow();
 }
 
-PLUGIN_API VOID OnReloadUI(VOID)
+PLUGIN_API VOID OnReloadUI()
 {
     if (InGame()) {
         CreateInterfaceWindow();
@@ -182,7 +182,7 @@ PLUGIN_API VOID SetGameState(DWORD GameState)
     }
 }
 
-PLUGIN_API VOID OnPulse(VOID)
+PLUGIN_API VOID OnPulse()
 {
     //create a timer to prevent us from pulsing too fast.
     static uint64_t refreshTimer = 0;
