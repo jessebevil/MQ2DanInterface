@@ -16,6 +16,7 @@ Dannet Resource Page: https://www.redguides.com/community/resources/mq2dannet.32
 #include <functional>
 
 PreSetup("MQ2DanInterface");
+PLUGIN_VERSION(1.0);
 typedef void(*fFunction)();
 std::map<std::string, fFunction> options;
 
